@@ -1,5 +1,5 @@
 <?php
-	include("./lib/sc2ranks.php"); // Include sc2ranks api library
+	include("lib/sc2ranks.php"); // Include sc2ranks api library
 	
 	// Turn on error reporting
 	ini_set('display_errors', 1);
@@ -11,15 +11,17 @@
 	 * @param int $uid the user to whose information to update
 	 * @return object the user sc2ranks data object, as mapped from the schema
 	 */
-	function helper_update_sc2ranks($uid){
+	function helper_update_sc2ranks($uid, $is_new = TRUE){
 		// TODO Make these accessible via the module configuration
 		/*
 		 * Start variables that should be configuration exposed
 		 */
 		$cache_expiration = 60*60*24*7; // One week
-		$request = new sc2ranks_request($appkey);
 		$app_key = "asustarcraft.com";
 		$current_time = time();
+		$name_profile_field = "profile_character_name";	// The profile field for character name
+		$code_profile_field = "profile_character_code";	// The profile field for character code
+		$debug = FALSE;
 		/*
 		 * End variables that should be configuration exposed
 		 */
@@ -31,8 +33,8 @@
 					FROM {profile_values}, {profile_fields}
 					WHERE {profile_values}.uid = %d 
 						AND {profile_fields}.fid = {profile_values}.fid
-						AND ({profile_fields}.name = %s
-						OR {profile_fields}.name = %s)',
+						AND ({profile_fields}.name = \'%s\'
+						OR {profile_fields}.name = \'%s\')',
 					$uid, $name_profile_field, $code_profile_field);
 				if($result){
 					$char_name = "";
@@ -48,16 +50,19 @@
 							$char_info = db_fetch_object($result);
 							$char_name = $char_info->value;
 						} else {
-							trigger_error("db_fetch_object returned unknown character information object format.", E_USER_ERROR);
+							drupal_set_message("db_fetch_object returned unknown character information object format.", "error");
+							return null;
 						}
 					} else {
 						// Error fetching db object
-						trigger_error("Could not fetch object from result set.", E_USER_ERROR);
+						drupal_set_message("could not fetch object from result set.", "error");
+						return null;
 					}
 				} else {
 					// Error we couldn't find user info the database anymore
 					// but we have some expired cache data for him
-					trigger_error("Could not find user battle.net info in database.", E_USER_NOTICE);
+					drupal_set_message("could not find user battle.net info in database.", "warning");
+					return null;
 				}
 		// Update the data from the sc2ranks site
 		$request = new sc2ranks_request($app_key);
@@ -65,18 +70,35 @@
 		$new_team_data = $request->get_bracket_data();
 		// pack the info
 		$to_save = array(
-			'uid' => $uid, 
-			'league' => $new_team_data->league,
-			'points' => $new_team_data->points,
-			'division' => $new_team_data->division,
-			'wins' => $new_team_data->wins,
-			'loses' => $new_team_data->losses,
+			'uid' => $uid,
+			'character_name' => $char_name,
+			'character_code' => $char_code,
+			'league' => $new_team_data[0]->league,
+			'points' => $new_team_data[0]->points,
+			'division' => $new_team_data[0]->division,
+			'wins' => $new_team_data[0]->wins,
+			'loses' => $new_team_data[0]->losses,
+			'fav_race' => $new_team_data[0]->fav_race,
 			'modified' => $current_time);
 		// Insert or update into database
-		drupal_write_record("{sc2ranks}", $to_save, $uid)
-		return $to_save;
+		if($is_new)
+		{
+			if($debug) drupal_set_message("Writing data to table as new.");
+			drupal_write_record("cache_sc2ranks", $to_save);
+		} else {
+			if($debug) drupal_set_message("Writing data to table as update.");
+			drupal_write_record("cache_sc2ranks", $to_save, $uid);
+		}
+		// Select what we just inserted
+		$result = db_query('SELECT * FROM {cache_sc2ranks} WHERE uid = %d', $uid);
+		if($data = db_fetch_object($result)){
+			return $data;
+		} else {
+			drupal_set_message("error requerying database.", "warning");
+			return null;
+		}
 	}
-
+	
 	/**
 	 * Helper function, checks if sc2ranks data in database is not expired, if
 	 * not then it returns the data from database otherwise updates info in db
@@ -90,39 +112,89 @@
 		 */
 		$cache_expiration = 60*60*24*7; 				// One week
 		$current_time = time();							// Now, to calc cache
-		$name_profile_field = "profile_character";		// The profile field for character name
+		$name_profile_field = "profile_character_name";	// The profile field for character name
 		$code_profile_field = "profile_character_code";	// The profile field for character code
+		$debug = FALSE;
 		/*
 		 * End variables that should be configuration exposed
 		 */
 		
-		$result = db_query('SELECT * FROM {sc2ranks} WHERE uid = %d', $uid);
+		$result = db_query('SELECT * FROM {cache_sc2ranks} WHERE uid = %d', $uid);
 		// Refer to sc2ranks.install for database schema
 		if($user = db_fetch_object($result)){
-			if (($user.modified - $current_time) >= $cache_expiration){
-				return helper_update_sc2ranks($uid);
+			if (($user->modified - $current_time) >= $cache_expiration){
+				if($debug) drupal_set_message("Updating cached data.");
+				return helper_update_sc2ranks($user->uid, FALSE);
 			} else {
 				// Data is valid
+				if($debug) drupal_set_message("Using cached data.");
 				return $user;
 			}
 		} else {
 			// User not in cache database
 			// Create new cache entry
+			if($debug) drupal_set_message("Creating new object.");
 			return helper_update_sc2ranks($uid);
 		}
 	}
+	
+	/**
+	 * Implementation of hook_perm()
+	 */
+	function sc2ranks_perm(){
+		return array('view sc2ranks records', 'administer sc2ranks module');
+	}
 
 	/**
-	 * Implementation of hook_user
+	 * Implementation of hook_theme()
+	 */
+	function sc2ranks_theme() {
+		return array(
+			'profile_sc2ranks' => array(
+				'template' => 'profile-sc2ranks',
+				'arguments' => array('record_data' => NULL),
+			),
+		);
+	}
+	
+	/**
+	 * Implementation of preprocess_theme_hook()
+	 */
+	function template_preprocess_profile_sc2ranks(&$variables){
+		$variables['league_image_url'] = base_path() . 
+			drupal_get_path('module', 'sc2ranks') . "/images/icon-rank-" .
+			$variables['record_data']->league . ".png";
+		if($variables['losses'] == 0){
+			$variables['ratio'] = 100;
+		} else {
+			$variables['ratio'] = $variables['wins']/$variables['losses'];
+		}
+	}
+	
+	/**
+	 * Implementation of hook_profile_alter()
 	 * Adds user to cache table is creating a new user, Checks if the user data
 	 * is up to date if displaying user info on a profile.
 	 */
-	function sc2ranks_user($op, &$edit, &$account, $category = NULL){
-		if($op == "view"){
-			// If user account being viewed then let's append our data
-			$uid = $account->uid;
-			$account_data = helper_get_sc2ranks($uid);
-			$account->content["sc2ranks"] = $account_data;
-		}
+	function sc2ranks_profile_alter(&$account){
+		// If user account being viewed then let's append our data
+		$uid = $account->uid;
+		$account_data = helper_get_sc2ranks($uid);
+		$account->content['summary']['sc2ranks'] = array(
+			'#type' => t('user_profile_item'),
+			'#title' => t('Battle.net Record'),
+			'#value' => theme("profile_sc2ranks", $account_data)
+		);
+		
+		// TEST
+		/*
+		$request = new sc2ranks_request("ameerayoub.com");
+		$account_info = $request->get_character_data("meerkat", 678);
+		$record_data = $request->get_bracket_data();
+		$account->content['summary']['sc2ranks'] = array(
+			'#type' => t('user_profile_item'),
+			'#title' => t('Battle.net Record'),
+			'#value' => theme("profile_sc2ranks", $record_data[0])
+		);
+		*/
 	}
-?>

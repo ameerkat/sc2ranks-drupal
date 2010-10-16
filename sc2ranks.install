@@ -1,7 +1,7 @@
 <?php
 function sc2ranks_schema() {
 	// Specifications for sc2ranks_cache table
-	$schema['sc2ranks_cache'] = array(
+	$schema['cache_sc2ranks'] = array(
 		'description' => t('Cache for sc2ranks.com data'),
 		'fields' => array(
 			'uid' => array(
@@ -10,13 +10,22 @@ function sc2ranks_schema() {
 				'unsigned'		=> TRUE,
 				'not null'		=> TRUE,
 				'default'		=> 0),
-			'league' => array(
-				'description'	=> t('League of the player (u = 0, b = 1, \
-										s = 2, g = 3, p = 4, d = 5).'),
+			'character_name' => array(
+				'description'	=> t('The bnet character this data is related to.'),
+				'type'			=> 'varchar',
+				'length'		=> 255,
+				'not null'		=> FALSE),
+			'character_code' => array(
+				'description'	=> t('The bnet character code for the bnet character.'),
 				'type'			=> 'int',
-				'unsigned'		=> TRUE,
 				'not null'		=> TRUE,
-				'default'		=> 0),
+				'default'		=> 0,
+				'unsigned'		=> TRUE),
+			'league' => array(
+				'description'	=> t('League of the player.'),
+				'type'			=> 'varchar',
+				'length'		=> 255,
+				'not null'		=> FALSE),
 			'points' => array(
 				'description'	=> t('Number of points for the player.'),
 				'type'			=> 'int',
@@ -26,7 +35,7 @@ function sc2ranks_schema() {
 			'division' => array(
 				'description'	=> t('Division of the player.'),
 				'type'			=> 'varchar',
-				'length'		=> 256,
+				'length'		=> 255,
 				'not null'		=> FALSE),
 			'wins' => array(
 				'description'	=> t('The number of wins for the player.'),
@@ -34,16 +43,22 @@ function sc2ranks_schema() {
 				'unsigned'		=> TRUE,
 				'not null'		=> TRUE,
 				'default'		=> 0),
-			'loses' => array(
-				'description'	=> t('The number of loses for the player.'),
+			'losses' => array(
+				'description'	=> t('The number of losses for the player.'),
 				'type'			=> 'int',
 				'unsigned'		=> TRUE,
 				'not null'		=> TRUE,
 				'default'		=> 0),
+			'fav_race' => array(
+				'description'	=> t('The most frequently played race.'),
+				'type'			=> 'varchar',
+				'length'		=> 255,
+				'not null'		=> FALSE),
 			'modified' => array(
 				'description'	=> t('When the cache entry was last modified.'),
-				'type'			=> 'datetime',
-				'not null'		=> FALSE)
+				'type'			=> 'int',
+				'not null'		=> TRUE,
+				'default'		=> 0)
 		),
 		'primary key' => array('uid'),
 	);
