@@ -23,3 +23,5 @@ Refer to the default profile-sc2ranks.tpl.php for variable data.
 ## TODO
 * Better Theming documentation
 * Views integration
+* Support other regions besides us
+* Race images

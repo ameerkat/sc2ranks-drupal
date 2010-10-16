@@ -54,6 +54,11 @@ function sc2ranks_schema() {
 				'type'			=> 'varchar',
 				'length'		=> 255,
 				'not null'		=> FALSE),
+			'bnet_id' => array(
+				'description'	=> t('bnet_id to link back to sc2ranks.com or bnet site.'),
+				'type'			=> 'int',
+				'unsigned'		=> TRUE,
+				'not null'		=> FALSE),
 			'modified' => array(
 				'description'	=> t('When the cache entry was last modified.'),
 				'type'			=> 'int',

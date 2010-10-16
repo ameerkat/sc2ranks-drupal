@@ -33,6 +33,14 @@
 			</tr>
 		</tbody>
 	</table>
+	<div id="sc2ranks-link" style="font-size: 8pt; text-align: right; margin-right: 5px;">
+	<a href="<?php print($sc2ranks_profile_url); ?>">
+		<img src="<?php print($sc2ranks_icon_url); ?>" />
+		<span style="position: relative; top: -4px;"> sc2ranks</span></a>
+	<a href="<?php print($bnet_profile_url); ?>">
+		<img src="<?php print($bnet_icon_url); ?>" style="margin-left: 5px;">
+		<span style="position: relative; top: -4px;"> bnet</span></a>
+	</div>
 </div>
 <?php else: ?>
 Data Not Available

@@ -83,6 +83,7 @@
 			'wins' => $new_team_data[0]->wins,
 			'loses' => $new_team_data[0]->losses,
 			'fav_race' => $new_team_data[0]->fav_race,
+			'bnet_id'	=> $new_char_data->bnet_id,
 			'modified' => $current_time);
 		// Insert or update into database
 		if($is_new)
@@ -163,9 +164,24 @@
 	 */
 	function template_preprocess_profile_sc2ranks(&$variables){
 		if($variables['record_data']){
+			$variables['sc2ranks_profile_url'] = 'http://www.sc2ranks.com/us/' .
+			$variables['record_data']->bnet_id . '/' .
+			$variables['record_data']->character_name . '/';
+			
+			$variables['bnet_profile_url'] = "http://us.battle.net/sc2/en/profile/" .
+			$variables['record_data']->bnet_id . '/1/' . 
+			$variables['record_data']->character_name . '/';
+			
 			$variables['league_image_url'] = base_path() . 
 			drupal_get_path('module', 'sc2ranks') . "/images/icon-rank-" .
 			$variables['record_data']->league . ".png";
+			
+			$variables['sc2ranks_icon_url'] = base_path() . 
+			drupal_get_path('module', 'sc2ranks') . "/images/sc2ranks-icon.png";
+			
+			$variables['bnet_icon_url'] = base_path() . 
+			drupal_get_path('module', 'sc2ranks') . "/images/bnet-icon.png";
+			
 			if($variables['losses'] == 0){
 				$variables['ratio'] = 100;
 			} else {
