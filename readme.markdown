@@ -1,4 +1,4 @@
-# sc2ranks for drupal
+# sc2ranks module for drupal
 
 ## Usage
 1. Make sure you have the profile module enabled.
@@ -11,6 +11,9 @@ field names you set earlier in the profile configuration panel so sc2ranks modul
 knows where to look for a user's character name and code.
 6. Check everything is working by visiting a user's profile page that has
 set a battle.net character name and id.
+
+### Screenshot
+![Sample profile data](images/readme-sample-profile-data.jpg)
 
 ## Theming
 You can override theme data by creating your own profile-sc2ranks.tpl.php
