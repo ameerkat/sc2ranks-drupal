@@ -1,0 +1,62 @@
+<?php
+function sc2ranks_schema() {
+	// Specifications for sc2ranks_cache table
+	$schema['sc2ranks_cache'] = array(
+		'description' => t('Cache for sc2ranks.com data'),
+		'fields' => array(
+			'uid' => array(
+				'description'	=> t('The {user} this data is related to.'),
+				'type'			=> 'int',
+				'unsigned'		=> TRUE,
+				'not null'		=> TRUE,
+				'default'		=> 0),
+			'league' => array(
+				'description'	=> t('League of the player (u = 0, b = 1, \
+										s = 2, g = 3, p = 4, d = 5).'),
+				'type'			=> 'int',
+				'unsigned'		=> TRUE,
+				'not null'		=> TRUE,
+				'default'		=> 0),
+			'points' => array(
+				'description'	=> t('Number of points for the player.'),
+				'type'			=> 'int',
+				'unsigned'		=> TRUE,
+				'not null'		=> FALSE,
+				'default'		=> 0),
+			'division' => array(
+				'description'	=> t('Division of the player.'),
+				'type'			=> 'varchar',
+				'length'		=> 256,
+				'not null'		=> FALSE),
+			'wins' => array(
+				'description'	=> t('The number of wins for the player.'),
+				'type'			=> 'int',
+				'unsigned'		=> TRUE,
+				'not null'		=> TRUE,
+				'default'		=> 0),
+			'loses' => array(
+				'description'	=> t('The number of loses for the player.'),
+				'type'			=> 'int',
+				'unsigned'		=> TRUE,
+				'not null'		=> TRUE,
+				'default'		=> 0),
+			'modified' => array(
+				'description'	=> t('When the cache entry was last modified.'),
+				'type'			=> 'datetime',
+				'not null'		=> FALSE)
+		),
+		'primary key' => array('uid'),
+	);
+	return $schema;
+}
+
+function sc2ranks_install() {
+	// Create cache table
+	drupal_install_schema('sc2ranks');
+}
+
+function sc2ranks_uninstall() {
+	// Drop cache table
+	drupal_uninstall_schema('sc2ranks');
+}
+?>

@@ -1,0 +1,6 @@
+; $Id$
+name = "sc2ranks"
+description = "sc2ranks.com/profile integration"
+core = 6.x
+package = "StarCraft 2"
+dependencies[] = profile
