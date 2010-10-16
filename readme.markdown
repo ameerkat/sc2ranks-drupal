@@ -13,4 +13,5 @@ for a user's character name and code.
 
 ## Theming
 You can override theme data by creating your own profile-sc2ranks.tpl.php
+
 Refer to the default profile-sc2ranks.tpl.php for variable data.
