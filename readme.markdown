@@ -16,3 +16,7 @@ set a battle.net character name and id.
 You can override theme data by creating your own profile-sc2ranks.tpl.php
 
 Refer to the default profile-sc2ranks.tpl.php for variable data.
+
+## TODO
+* Better Theming documentation
+* Views integration
