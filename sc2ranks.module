@@ -1,9 +1,9 @@
 <?php
+	/**
+	 * sc2ranks.com / drupal user profile integration module
+	 * @author Ameer Ayoub <ameer.ayoub@gmail.com>
+	 */
 	include("lib/sc2ranks.php"); // Include sc2ranks api library
-	
-	// Turn on error reporting
-	ini_set('display_errors', 1);
-	error_reporting(E_ALL|E_STRICT);
 	
 	/**
 	 * Helper function, replaces info in database with new data and returns new
