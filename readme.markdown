@@ -13,7 +13,7 @@ knows where to look for a user's character name and code.
 set a battle.net character name and id.
 
 ### Screenshot
-![Sample profile data](images/readme-sample-profile-data.jpg)
+![Sample profile data](http://github.com/ameerkat/sc2ranks-drupal/raw/master/images/readme-sample-profile-data.jpg)
 
 ## Theming
 You can override theme data by creating your own profile-sc2ranks.tpl.php
