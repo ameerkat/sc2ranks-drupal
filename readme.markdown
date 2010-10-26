@@ -20,8 +20,18 @@ You can override theme data by creating your own profile-sc2ranks.tpl.php
 
 Refer to the default profile-sc2ranks.tpl.php for variable data.
 
+## Views Integration
+If you have the views module installed you may use the cached data from
+sc2ranks.com in a views, simple create a new view of type sc2ranks. You can 
+add associated user to the relationships to get access to the user's drupal
+information in the view. You can add different fields from all the information
+stored in the system about the user.
+
+![Sample views](http://github.com/ameerkat/sc2ranks-drupal/raw/master/images/readme-sample-views.jpg)
+
 ## TODO
 * Better Theming documentation
-* Views integration
 * Support other regions besides us
 * Race images
+* Default player listing view
+* Enhanced view integration

@@ -141,6 +141,15 @@
 	}
 	
 	/**
+	 * Implemenation of hook_views_api
+	 */
+	function sc2ranks_views_api() {
+		return array(
+			'api' => 2,
+		);
+	}
+	
+	/**
 	 * Implementation of hook_perm()
 	 */
 	function sc2ranks_perm(){
