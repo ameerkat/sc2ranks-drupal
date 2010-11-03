@@ -67,6 +67,7 @@ function sc2ranks_schema() {
 		),
 		'primary key' => array('uid'),
 	);
+	
 	return $schema;
 }
 
@@ -79,4 +80,3 @@ function sc2ranks_uninstall() {
 	// Drop cache table
 	drupal_uninstall_schema('sc2ranks');
 }
-?>

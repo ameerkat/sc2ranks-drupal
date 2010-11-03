@@ -2,6 +2,6 @@
 name = "sc2ranks"
 description = "sc2ranks.com/user profile integration"
 core = 6.x
-version = 0.3
+version = 6.x-0.31
 package = "StarCraft 2"
 dependencies[] = profile

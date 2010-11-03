@@ -23,7 +23,7 @@
 					#<?php print($record_data->character_code); ?>
 					</span>
 				</td>
-				<td><?php print($record_data->fav_race); ?></td>
+				<td><img src="<?php print $race_image_url ?>" alt="<?php print($record_data->fav_race); ?>" /></td>
 				<td><img src="<?php print $league_image_url ?>" alt="<?php print($record_data->league); ?>" style="width: 25px;"/></td>
 				<td><?php print($record_data->points); ?></td>
 				<td><?php print($record_data->division); ?></td>

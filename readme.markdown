@@ -32,6 +32,5 @@ stored in the system about the user.
 ## TODO
 * Better Theming documentation
 * Support other regions besides us
-* Race images
 * Default player listing view
-* Enhanced view integration
+* Better Views integration

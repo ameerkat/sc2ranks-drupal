@@ -185,6 +185,10 @@
 			drupal_get_path('module', 'sc2ranks') . "/images/icon-rank-" .
 			$variables['record_data']->league . ".png";
 			
+			$variables['race_image_url'] = base_path() . 
+			drupal_get_path('module', 'sc2ranks') . "/images/icon-race-" .
+			$variables['record_data']->fav_race . ".jpg";
+			
 			$variables['sc2ranks_icon_url'] = base_path() . 
 			drupal_get_path('module', 'sc2ranks') . "/images/sc2ranks-icon.png";
 			
