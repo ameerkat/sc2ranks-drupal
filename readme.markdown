@@ -34,3 +34,4 @@ stored in the system about the user.
 * Support other regions besides us
 * Default player listing view
 * Better Views integration
+* Make reliance on profile module optional (offer up fields through module if wanted)
