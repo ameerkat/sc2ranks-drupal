@@ -273,7 +273,7 @@
 	function sc2ranks_menu() {
 		$items = array();
 		$items['admin/settings/sc2ranks'] = array(
-			'title' => 'Sc2ranks module settings',
+			'title' => 'Sc2ranks settings',
 			'description' => 'Set profile field names, api key, and cache settings for the sc2ranks module.',
 			'page callback' => 'drupal_get_form',
 			'page arguments' => array('sc2ranks_admin'),
