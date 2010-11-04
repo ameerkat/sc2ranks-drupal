@@ -31,7 +31,9 @@ stored in the system about the user.
 
 ## TODO
 * Better Theming documentation
-* Support other regions besides us
+* Support other regions besides U.S.
 * Default player listing view
 * Better Views integration
+	* Custom sort on league field
+	* Provide images for race, league to views
 * Make reliance on profile module optional (offer up fields through module if wanted)
