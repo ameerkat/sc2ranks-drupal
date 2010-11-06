@@ -31,6 +31,7 @@ stored in the system about the user.
 
 ## TODO
 * Better Theming documentation
+* Player Portraits
 * Support other regions besides U.S.
 * Default player listing view
 * Better Views integration
