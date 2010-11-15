@@ -435,5 +435,5 @@ function sc2ranks_views_default_views() {
 	  'weight' => 0,
 	  'name' => 'navigation',
 	));
-	return array($view);
+	return array($view->name => $view);
 }
