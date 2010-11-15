@@ -146,6 +146,7 @@
 	function sc2ranks_views_api() {
 		return array(
 			'api' => 2,
+			'path' => drupal_get_path('module', 'sc2ranks'),
 		);
 	}
 	

@@ -210,7 +210,7 @@ function sc2ranks_views_data() {
  */
 function sc2ranks_views_default_views() {
 	$view = new view;
-	$view->name = 'player_listing';
+	$view->name = 'sc2ranks_player_listing';
 	$view->description = 'Player listing using player stats from sc2ranks module.';
 	$view->tag = 'sc2ranks';
 	$view->view_php = '';
@@ -435,5 +435,6 @@ function sc2ranks_views_default_views() {
 	  'weight' => 0,
 	  'name' => 'navigation',
 	));
-	return array($view->name => $view);
+	$views[$view->name] = $view;
+	return $views;
 }
