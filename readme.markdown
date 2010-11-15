@@ -22,19 +22,19 @@ Refer to the default profile-sc2ranks.tpl.php for variable data.
 
 ## Views Integration
 If you have the views module installed you may use the cached data from
-sc2ranks.com in a views, simple create a new view of type sc2ranks. You can 
-add associated user to the relationships to get access to the user's drupal
-information in the view. You can add different fields from all the information
-stored in the system about the user.
+sc2ranks.com in a views, simple create a new view of type sc2ranks.
+There is a default view at sc2ranks/player_listing containing a listing
+of players. You can add associated user to the relationships to get access to 
+the user's drupal information in the view. You can add different fields from 
+all the information stored in the system about the user.
 
 ![Sample views](http://github.com/ameerkat/sc2ranks-drupal/raw/master/images/readme-sample-views.jpg)
 
 ## TODO
 * Better Theming documentation
-* Player Portraits
+* Player Portraits (Merge w/Troyan's Code)
 * Support other regions besides U.S.
-* Default player listing view
 * Better Views integration
 	* Custom sort on league field
-	* Provide images for race, league to views
+	* Make image handlers optional, add profile link handlers.
 * Make reliance on profile module optional (offer up fields through module if wanted)
