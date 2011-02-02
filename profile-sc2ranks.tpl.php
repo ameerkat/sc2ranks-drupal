@@ -27,8 +27,8 @@
 					<?php endif; ?>
 				</td>
 				<td><?php print($record_data->region); ?></td>
-				<td><img src="<?php print $race_image_url ?>" alt="<?php print($record_data->fav_race); ?>" /></td>
-				<td><img src="<?php print $league_image_url ?>" alt="<?php print($record_data->league); ?>" style="width: 25px;"/></td>
+				<td><img src="<?php print $race_image_url ?>" alt="<?php print($record_data->fav_race); ?>" title="<?php print($record_data->fav_race); ?>" /></td>
+				<td><img src="<?php print $league_image_url ?>" alt="<?php print($record_data->league); ?>" title="<?php print($record_data->league); ?>" style="width: 25px;"/></td>
 				<td><?php print($record_data->points); ?></td>
 				<td><?php print($record_data->division); ?></td>
 				<td><?php print($record_data->wins); ?></td>
