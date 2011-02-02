@@ -28,7 +28,7 @@ function sc2ranks_schema() {
 				'unsigned'		=> TRUE),
 			'league' => array(
 				'description'	=> t('League of the player.'),
-				'type'			=> 'varchar',
+				'type'			=> 'int',
 				'length'		=> 255,
 				'not null'		=> FALSE),
 			'points' => array(

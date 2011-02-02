@@ -4,7 +4,24 @@
 	 * @author Ameer Ayoub <ameer.ayoub@gmail.com>
 	 */
 	include("lib/sc2ranks.php"); // Include sc2ranks api library
-	
+
+
+	function helper_int_to_league($int){
+		$league_number = array("bronze", "silver", "gold", "platinum", "diamond", "master");
+		return $league_number[$int];
+	}
+	function helper_league_to_int($league){
+		$league_array =   array("bronze"    => 0,
+			                "silver"    => 1,
+			                "gold"      => 2,
+               			         "platinum" => 3,
+	               		         "diamond"  => 4,
+		               	         "master"  => 5
+		               	);
+		$league = strtolower($league);
+		return $league_array[$league];
+	}
+
 	/**
 	 * Helper function, replaces info in database with new data and returns new
 	 * data.
@@ -65,14 +82,17 @@
 		$request = new sc2ranks_request($app_key);
 		$new_char_data = $request->get_character_data($char_name, $char_code, $char_region);
 		$new_team_data = $request->get_bracket_data();
-		
+ 		print $new_team_data[0]->league;
+		print helper_league_to_int($new_team_data[0]->league);
+		$league = helper_league_to_int($new_team_data[0]->league);	
+		print $league;
 		// pack the info
 		$to_save = array(
 			'uid' => $uid,
 			'region' => $char_region,
 			'character_name' => $char_name,
 			'character_code' => $char_code,
-			'league' => $new_team_data[0]->league,
+			'league' => $league,
 			'points' => $new_team_data[0]->points,
 			'division' => $new_team_data[0]->division,
 			'wins' => $new_team_data[0]->wins,
@@ -183,7 +203,7 @@
 			
 			$variables['league_image_url'] = base_path() . 
 			drupal_get_path('module', 'sc2ranks') . "/images/icon-rank-" .
-			$variables['record_data']->league . ".png";
+			helper_int_to_league($variables['record_data']->league) . ".png";
 			
 			$variables['race_image_url'] = base_path() . 
 			drupal_get_path('module', 'sc2ranks') . "/images/icon-race-" .
@@ -193,7 +213,7 @@
 			drupal_get_path('module', 'sc2ranks') . "/images/sc2ranks-icon.png";
 			
 			$variables['bnet_icon_url'] = base_path() . 
-			drupal_get_path('module', 'sc2ranks') . "/images/bnet-icon.png";
+			helper_int_to_league($variables['record_data']->league) . ".png";
 			
 			$games = $variables['record_data']->wins + $variables['record_data']->losses;
 			if($games == 0){
