@@ -119,7 +119,7 @@
 		$result = db_query('SELECT * FROM {cache_sc2ranks} WHERE uid = %d', $uid);
 		// Refer to sc2ranks.install for database schema
 		if($user = db_fetch_object($result)){
-			if (($user->modified - $current_time) >= $cache_expiration){
+			if (($user->modified + $cache_expiration) <= $current_time){
 				if($debug) drupal_set_message("Updating cached data.");
 				return helper_update_sc2ranks($user->uid, FALSE);
 			} else {
