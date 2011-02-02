@@ -148,7 +148,7 @@
 	 * Implementation of hook_perm()
 	 */
 	function sc2ranks_perm(){
-		return array('view sc2ranks records', 'administer sc2ranks module');
+		return array('view sc2ranks records', 'administer sc2ranks module', 'access character code');
 	}
 
 	/**
@@ -168,6 +168,8 @@
 	 */
 	function template_preprocess_profile_sc2ranks(&$variables){
 		if($variables['record_data']){
+			$variables['show_code'] = (bool) db_result(db_query('SELECT fid FROM {profile_fields} WHERE name = \'%s\' AND visibility NOT IN (%d, %d)', array(variable_get("sc2ranks_code_profile_field", "profile_character_code"), PROFILE_PRIVATE, PROFILE_HIDDEN)));
+
 			$variables['sc2ranks_profile_url'] = 'http://www.sc2ranks.com/' .
 			$variables['record_data']->region . '/' .
 			$variables['record_data']->bnet_id . '/' .

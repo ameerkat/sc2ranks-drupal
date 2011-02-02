@@ -19,9 +19,11 @@
 					<span id="sc2ranks-character-name">
 					<?php print($record_data->character_name); ?>
 					</span>
-					<span id="sc2ranks-character-code" style="color: #AAAAAA;">
-					#<?php print($record_data->character_code); ?>
-					</span>
+					<?php if ($show_code || user_access('access character code')): ?>
+						<span id="sc2ranks-character-code" style="color: #AAAAAA;">
+						#<?php print($record_data->character_code); ?>
+						</span>
+					<?php endif; ?>
 				</td>
 				<td><img src="<?php print $race_image_url ?>" alt="<?php print($record_data->fav_race); ?>" /></td>
 				<td><img src="<?php print $league_image_url ?>" alt="<?php print($record_data->league); ?>" style="width: 25px;"/></td>
