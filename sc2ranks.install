@@ -10,6 +10,11 @@ function sc2ranks_schema() {
 				'unsigned'		=> TRUE,
 				'not null'		=> TRUE,
 				'default'		=> 0),
+			'region' => array(
+				'description'	=> t('The bnet region this data is related to.'),
+				'type'			=> 'varchar',
+				'length'		=> 255,
+				'not null'		=> FALSE),
 			'character_name' => array(
 				'description'	=> t('The bnet character this data is related to.'),
 				'type'			=> 'varchar',

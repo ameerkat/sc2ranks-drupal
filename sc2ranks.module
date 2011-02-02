@@ -15,6 +15,8 @@
 		// One week
 		$cache_expiration = 60*variable_get("sc2ranks_cache_expiration", 60*24*7);
 		$current_time = time();							// Now, to calc cache
+		// The profile field for character region
+		$region_profile_field = variable_get("sc2ranks_region_profile_field", "profile_character_region");
 		// The profile field for character name
 		$name_profile_field = variable_get("sc2ranks_name_profile_field", "profile_character_name");
 		// The profile field for character code
@@ -23,53 +25,45 @@
 		$current_time = time();
 		$debug = FALSE;
 		 
+		$char_region = "";
 		$char_name = "";
 		$char_code = 0;
 		
 		// Get the data from the db table
 		// Build the query to get the user's bnet info
 		$result = db_query(
-					'SELECT {profile_fields}.name, {profile_values}.value
-					FROM {profile_values}, {profile_fields}
-					WHERE {profile_values}.uid = %d 
-						AND {profile_fields}.fid = {profile_values}.fid
-						AND ({profile_fields}.name = \'%s\'
-						OR {profile_fields}.name = \'%s\')',
-					$uid, $name_profile_field, $code_profile_field);
-				if($result){
-					$char_info = db_fetch_object($result);
-					if($char_info){
-						if ($char_info->name == $name_profile_field){
-							$char_name = $char_info->value;
-							$char_info = db_fetch_object($result);
-							$char_code = $char_info->value;
-						} else if ($char_info->name == $code_profile_field) {
-							$char_code = $char_info->value;
-							$char_info = db_fetch_object($result);
-							$char_name = $char_info->value;
-						} else {
-							drupal_set_message("db_fetch_object returned unknown character information object format.", "error");
-							return null;
-						}
-					} else {
-						// Error fetching db object
-						drupal_set_message("could not fetch object from result set.", "error");
-						return null;
-					}
-				} else {
-					// Error we couldn't find user info the database anymore
-					// but we have some expired cache data for him
-					drupal_set_message("could not find user battle.net info in database.", "warning");
+			'SELECT {profile_fields}.name, {profile_values}.value
+			FROM {profile_values}
+			LEFT JOIN {profile_fields} ON {profile_values}.fid = {profile_fields}.fid
+			WHERE {profile_values}.uid = %d
+			AND {profile_fields}.name IN (\'%s\', \'%s\', \'%s\')',
+			$uid, $name_profile_field, $code_profile_field, $region_profile_field);
+
+		while ($char_info = db_fetch_object($result)){
+			switch ($char_info->name){
+				case $name_profile_field:
+					$char_name = $char_info->value;
+					break;
+				case $code_profile_field:
+					$char_code = $char_info->value;
+					break;
+				case $region_profile_field:
+					$char_region = $char_info->value;
+					break;
+				default:
+					drupal_set_message("db_fetch_object returned unknown character information object format.", "error");
 					return null;
-				}
+			}
+		}
 				
-		if ($char_name == "" || $char_name == null || $char_code == null || $char_code == 0){
+		if (strlen($char_region) == 0 || strlen($char_name) == 0 || $char_code == 0){
+			drupal_set_message(t("There is information missing from the profile."), "error");
 			return null;
 		}
 		
 		// Update the data from the sc2ranks site
 		$request = new sc2ranks_request($app_key);
-		$new_char_data = $request->get_character_data($char_name, $char_code);
+		$new_char_data = $request->get_character_data($char_name, $char_code, $char_region);
 		$new_team_data = $request->get_bracket_data();
 		
 		// pack the info
@@ -174,11 +168,13 @@
 	 */
 	function template_preprocess_profile_sc2ranks(&$variables){
 		if($variables['record_data']){
-			$variables['sc2ranks_profile_url'] = 'http://www.sc2ranks.com/us/' .
+			$variables['sc2ranks_profile_url'] = 'http://www.sc2ranks.com/' .
+			$variables['record_data']->region . '/' .
 			$variables['record_data']->bnet_id . '/' .
 			$variables['record_data']->character_name . '/';
 			
-			$variables['bnet_profile_url'] = "http://us.battle.net/sc2/en/profile/" .
+			$variables['bnet_profile_url'] = 'http://' .
+			$variables['record_data']->region . '.battle.net/sc2/en/profile/' .
 			$variables['record_data']->bnet_id . '/1/' . 
 			$variables['record_data']->character_name . '/';
 			
@@ -235,6 +231,15 @@
 				'#maxlength' => 255,
 				'#description' => 'The api key for sc2ranks.com, should just be your site name, any key is valid.',
 				'#required' => FALSE
+			),
+			'sc2ranks_region_profile_field' => array(
+				'#type'	=> 'textfield',
+				'#title' => 'Character name profile field',
+				'#default_value' => variable_get('sc2ranks_region_profile_field', "profile_character_region"),
+				'#size' => 63,
+				'#maxlength' => 255,
+				'#description' => 'The field you created using the profile module to hold a player\'s BNET character region.',
+				'#required' => TRUE
 			),
 			'sc2ranks_name_profile_field' => array(
 				'#type'	=> 'textfield',
