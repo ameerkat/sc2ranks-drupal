@@ -31,7 +31,7 @@
 				<td><?php print($record_data->division); ?></td>
 				<td><?php print($record_data->wins); ?></td>
 				<td><?php print($record_data->losses); ?></td>
-				<td><?php print($ratio); ?>%</td>
+				<td><?php print(number_format($ratio, 2)); ?>%</td>
 			</tr>
 		</tbody>
 	</table>
