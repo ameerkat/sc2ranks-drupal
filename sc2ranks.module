@@ -82,10 +82,7 @@
 		$request = new sc2ranks_request($app_key);
 		$new_char_data = $request->get_character_data($char_name, $char_code, $char_region);
 		$new_team_data = $request->get_bracket_data();
- 		print $new_team_data[0]->league;
-		print helper_league_to_int($new_team_data[0]->league);
 		$league = helper_league_to_int($new_team_data[0]->league);	
-		print $league;
 		// pack the info
 		$to_save = array(
 			'uid' => $uid,
