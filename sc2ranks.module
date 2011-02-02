@@ -87,7 +87,7 @@
 			drupal_write_record("cache_sc2ranks", $to_save);
 		} else {
 			if($debug) drupal_set_message("Writing data to table as update.");
-			drupal_write_record("cache_sc2ranks", $to_save, $uid);
+			drupal_write_record("cache_sc2ranks", $to_save, 'uid');
 		}
 		// Select what we just inserted
 		$result = db_query('SELECT * FROM {cache_sc2ranks} WHERE uid = %d', $uid);
