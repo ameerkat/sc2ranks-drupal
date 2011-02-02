@@ -197,7 +197,7 @@
 			
 			$games = $variables['record_data']->wins + $variables['record_data']->losses;
 			if($games == 0){
-				$variables['ratio'] = 100;
+				$variables['ratio'] = 0;
 			} else {
 				$variables['ratio'] = ($variables['record_data']->wins / $games) * 100;
 			}
