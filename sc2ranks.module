@@ -158,7 +158,6 @@
 	function sc2ranks_cron() {
 		$result = db_query('select uid from {cache_sc2ranks} where modified + %d <= %d', array(60*variable_get("sc2ranks_cache_expiration", 60*24*7), time()));
 		while ($obj = db_fetch_object($result)){
-			if($debug) drupal_set_message("Updating cached data for {$obj->uid}.");
 			helper_update_sc2ranks($obj->uid, FALSE);
 		}
 	}
