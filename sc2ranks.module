@@ -321,7 +321,7 @@
 				'#description' => 'The field you created using the profile module to hold a player\'s BNET character code.',
 				'#required' => TRUE
 			),
-			'sc2ranks_bnet_url_profile_field' => array(
+			'sc2ranks_url_profile_field' => array(
 				'#type'	=> 'textfield',
 				'#title' => 'Battle net profile url.',
 				'#default_value' => variable_get('sc2ranks_url_profile_field', "profile_bnet_url"),
