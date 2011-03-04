@@ -59,7 +59,7 @@
 		// The profile field for character code
 		$code_profile_field = variable_get("sc2ranks_code_profile_field", "profile_character_code");
 		// The bnet url
-                $bnet_profile_field = variable_get("sc2ranks_bnet_url_profile_field", "profile_bnet_url");
+                $bnet_profile_field = variable_get("sc2ranks_url_profile_field", "profile_bnet_url");
 
 		$app_key = variable_get("sc2ranks_app_key", null);
 		$current_time = time();
