@@ -23,6 +23,26 @@
 	}
 
 	/**
+	* Returns the bnet id from a bnet profile url.
+	* @param string $url battle net profile url.
+	* @return string the bnet profile id or an empty string if false.
+	*/
+	function helper_parse_bnetid($url)
+	{
+		//Static variables used in battle net's urls.
+		$ID_LOCATION = 6;
+		$SLASH_COUNT = 10;
+		if(!valid_url($url)){
+			return "foo";	
+		}
+		$parsed_url = split("/", $url);
+		if(sizeof($parsed_url) != $SLASH_COUNT){
+			return "BAD SLASH COUNT!";
+		}
+		return $parsed_url[$ID_LOCATION];
+	}
+
+	/**
 	 * Helper function, replaces info in database with new data and returns new
 	 * data.
 	 * @param int $uid the user to whose information to update
@@ -38,6 +58,9 @@
 		$name_profile_field = variable_get("sc2ranks_name_profile_field", "profile_character_name");
 		// The profile field for character code
 		$code_profile_field = variable_get("sc2ranks_code_profile_field", "profile_character_code");
+		// The bnet url
+                $bnet_profile_field = variable_get("sc2ranks_bnet_url_profile_field", "profile_bnet_url");
+
 		$app_key = variable_get("sc2ranks_app_key", null);
 		$current_time = time();
 		$debug = FALSE;
@@ -45,7 +68,8 @@
 		$char_region = "";
 		$char_name = "";
 		$char_code = 0;
-		
+		$char_url = "";	
+
 		// Get the data from the db table
 		// Build the query to get the user's bnet info
 		$result = db_query(
@@ -53,9 +77,8 @@
 			FROM {profile_values}
 			LEFT JOIN {profile_fields} ON {profile_values}.fid = {profile_fields}.fid
 			WHERE {profile_values}.uid = %d
-			AND {profile_fields}.name IN (\'%s\', \'%s\', \'%s\')',
-			$uid, $name_profile_field, $code_profile_field, $region_profile_field);
-
+			AND {profile_fields}.name IN (\'%s\', \'%s\', \'%s\', \'%s\')',
+			$uid, $name_profile_field, $code_profile_field, $region_profile_field, $bnet_profile_field);
 		while ($char_info = db_fetch_object($result)){
 			switch ($char_info->name){
 				case $name_profile_field:
@@ -67,12 +90,16 @@
 				case $region_profile_field:
 					$char_region = $char_info->value;
 					break;
+				case $bnet_profile_field:
+					$char_url = $char_info->value;
+					break;
 				default:
 					drupal_set_message("db_fetch_object returned unknown character information object format.", "error");
 					return null;
 			}
 		}
-				
+
+	
 		if (strlen($char_region) == 0 || strlen($char_name) == 0 || $char_code == 0){
 			drupal_set_message(t("There is information missing from the profile."), "error");
 			return null;
@@ -81,6 +108,10 @@
 		// Update the data from the sc2ranks site
 		$request = new sc2ranks_request($app_key);
 		$new_char_data = $request->get_character_data($char_name, $char_code, $char_region);
+		if($new_char_data->error){
+			$bnet_id = helper_parse_bnetid($char_url);
+			$new_char_data = $request->get_character_data($char_name, $bnet_id, $char_region);	
+		}
 		$new_team_data = $request->get_bracket_data();
 		$league = helper_league_to_int($new_team_data[0]->league);	
 		// pack the info
@@ -265,7 +296,7 @@
 			),
 			'sc2ranks_region_profile_field' => array(
 				'#type'	=> 'textfield',
-				'#title' => 'Character name profile field',
+				'#title' => 'Character region profile field',
 				'#default_value' => variable_get('sc2ranks_region_profile_field', "profile_character_region"),
 				'#size' => 63,
 				'#maxlength' => 255,
@@ -289,6 +320,15 @@
 				'#maxlength' => 255,
 				'#description' => 'The field you created using the profile module to hold a player\'s BNET character code.',
 				'#required' => TRUE
+			),
+			'sc2ranks_bnet_url_profile_field' => array(
+				'#type'	=> 'textfield',
+				'#title' => 'Battle net profile url.',
+				'#default_value' => variable_get('sc2ranks_url_profile_field', "profile_bnet_url"),
+				'#size' => 63,
+				'#maxlength' => 255,
+				'#description' => 'The field you created using the profile module to hold a player\'s BNET url',
+				'#required' => FALSE 
 			),
 			'sc2ranks_cache_expiration' => array(
 				'#type'	=> 'textfield',
