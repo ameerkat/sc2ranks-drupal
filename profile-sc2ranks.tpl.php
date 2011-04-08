@@ -32,7 +32,14 @@
 				<td><?php print($record_data->points); ?></td>
 				<td><?php print($record_data->division); ?></td>
 				<td><?php print($record_data->wins); ?></td>
-				<td><?php print($record_data->losses); ?></td>
+                                <?php
+                                  if($record_data->league == "masters"){
+                                     print("<td> $record_data->losses</td>"); 
+                                  }
+                                  else{
+                                     print("<td> <img src='$blue_ribbion_url' title='Losses? This guy is a winner!'> </img> </td>");
+                                  }
+                                 ?>
 				<td><?php print(number_format($ratio, 2)); ?>%</td>
 			</tr>
 		</tbody>

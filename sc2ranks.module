@@ -259,6 +259,7 @@
 			} else {
 				$variables['ratio'] = ($variables['record_data']->wins / $games) * 100;
 			}
+                        $variables['blue_ribbion_url'] = base_path() . drupal_get_path('module','sc2ranks') . "/images/blue_ribbon.png";
 		}
 	}
 	
