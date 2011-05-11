@@ -2,7 +2,7 @@
 
 ## Usage
 1. Make sure you have the profile module enabled.
-2. Create two fields for user's to enter character name and character code
+2. Create two fields for user's to enter character region, character name and character code
 data for battle.net, be sure to note the names of these fields.
 3. Install and enable the sc2ranks module.
 4. Configure permissions to view and administer the sc2ranks module
@@ -33,7 +33,6 @@ all the information stored in the system about the user.
 ## TODO
 * Better Theming documentation
 * Player Portraits (Merge w/Troyan's Code)
-* Support other regions besides U.S.
 * Better Views integration
 	* Custom sort on league field
 	* Make image handlers optional, add profile link handlers.

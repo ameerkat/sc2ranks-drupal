@@ -55,6 +55,23 @@ function sc2ranks_views_data() {
 		),
 	);
 	
+	$data['cache_sc2ranks']['region'] = array(
+		'title' 	=> t("Battle.Net Region"),
+		'help'		=> t("Battle.Net Region of the player."),
+		'field'		=> array(
+			'handler'	=> 'views_handler_field_profile_list'
+		),
+		'sort' => array(
+			'handler' => 'views_handler_sort',
+		),
+		'filter' => array(
+			'handler' => 'views_handler_filter_string',
+		),
+		'argument' => array(
+			'handler' => 'views_handler_argument_string',
+		),
+	);
+	
 	$data['cache_sc2ranks']['character_name'] = array(
 		'title' 	=> t("Battle.Net Character Name"),
 		'help'		=> t("Battle.Net Character Name associated with the user."),
@@ -262,6 +279,11 @@ function sc2ranks_views_default_views() {
 		'field' => 'name',
 		'relationship' => 'uid',
 	  ),
+	  'region' => array(
+		'id' => 'region',
+		'table' => 'cache_sc2ranks',
+		'field' => 'region',
+	  ),
 	  'character_name' => array(
 		'label' => 'Battle.Net Character Name',
 		'alter' => array(
@@ -368,6 +390,7 @@ function sc2ranks_views_default_views() {
 	  'sticky' => 0,
 	  'order' => 'asc',
 	  'columns' => array(
+		'region' => 'region',
 		'character_name' => 'character_name',
 		'wins' => 'wins',
 		'name' => 'name',
@@ -380,6 +403,10 @@ function sc2ranks_views_default_views() {
 		'points' => 'points',
 	  ),
 	  'info' => array(
+		'region' => array(
+		  'sortable' => 0,
+		  'separator' => '',
+		),
 		'character_name' => array(
 		  'sortable' => 0,
 		  'separator' => '',

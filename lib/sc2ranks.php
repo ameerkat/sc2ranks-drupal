@@ -82,18 +82,29 @@
 			}
 		}
 		
+                /**
+                 * URL validator used in get_character_data.
+                 */ 
+		private function isValidURL($url){
+			return preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
+		}
 		/**
 		 * Returns the deserialized character data object from the info
 		 * provided to the function.
 		 * @param string $name character name
-		 * @param string|int $code 3 digit character code
+		 * @param string|int $code 3 digit character code or bnet profile id from the bnet url.
 		 * @param string $region optional region information, defaults to US
 		 * @return object the deserialized character data
 		 */
 		public function get_character_data($name, $code, $region = "us"){
+                        $parse_character = "!";
+			//Checks to see if the code is the charcode.
+                        if(sizeof($code) == 3){
+				$parse_character = "$";	
+                        }
 			$request_url = $this->site_address.
 							rawurlencode($region)."/".
-							rawurlencode($name)."$".
+							rawurlencode($name).$parse_character.
 							rawurlencode($code).
 							".json?appKey=".$this->request_site_key;
 			$this->last_request = $request_url;
@@ -187,5 +198,6 @@
 		public function is_json_last_error_enabled(){
 			return $this->json_errors_enabled;
 		}
+
 	}
 ?>

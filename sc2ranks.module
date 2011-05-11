@@ -4,7 +4,44 @@
 	 * @author Ameer Ayoub <ameer.ayoub@gmail.com>
 	 */
 	include("lib/sc2ranks.php"); // Include sc2ranks api library
-	
+
+
+	function helper_int_to_league($int){
+		$league_number = array("bronze", "silver", "gold", "platinum", "diamond", "master");
+		return $league_number[$int];
+	}
+	function helper_league_to_int($league){
+		$league_array =   array("bronze"    => 0,
+			                "silver"    => 1,
+			                "gold"      => 2,
+               			         "platinum" => 3,
+	               		         "diamond"  => 4,
+		               	         "master"  => 5
+		               	);
+		$league = strtolower($league);
+		return $league_array[$league];
+	}
+
+	/**
+	* Returns the bnet id from a bnet profile url.
+	* @param string $url battle net profile url.
+	* @return string the bnet profile id or an empty string if false.
+	*/
+	function helper_parse_bnetid($url)
+	{
+		//Static variables used in battle net's urls.
+		$ID_LOCATION = 6;
+		$SLASH_COUNT = 10;
+		if(!valid_url($url)){
+			return "foo";	
+		}
+		$parsed_url = split("/", $url);
+		if(sizeof($parsed_url) != $SLASH_COUNT){
+			return "BAD SLASH COUNT!";
+		}
+		return $parsed_url[$ID_LOCATION];
+	}
+
 	/**
 	 * Helper function, replaces info in database with new data and returns new
 	 * data.
@@ -15,73 +52,79 @@
 		// One week
 		$cache_expiration = 60*variable_get("sc2ranks_cache_expiration", 60*24*7);
 		$current_time = time();							// Now, to calc cache
+		// The profile field for character region
+		$region_profile_field = variable_get("sc2ranks_region_profile_field", "profile_character_region");
 		// The profile field for character name
 		$name_profile_field = variable_get("sc2ranks_name_profile_field", "profile_character_name");
 		// The profile field for character code
 		$code_profile_field = variable_get("sc2ranks_code_profile_field", "profile_character_code");
+		// The bnet url
+                $bnet_profile_field = variable_get("sc2ranks_url_profile_field", "profile_bnet_url");
+
 		$app_key = variable_get("sc2ranks_app_key", null);
 		$current_time = time();
 		$debug = FALSE;
 		 
+		$char_region = "";
 		$char_name = "";
 		$char_code = 0;
-		
+		$char_url = "";	
+
 		// Get the data from the db table
 		// Build the query to get the user's bnet info
 		$result = db_query(
-					'SELECT {profile_fields}.name, {profile_values}.value
-					FROM {profile_values}, {profile_fields}
-					WHERE {profile_values}.uid = %d 
-						AND {profile_fields}.fid = {profile_values}.fid
-						AND ({profile_fields}.name = \'%s\'
-						OR {profile_fields}.name = \'%s\')',
-					$uid, $name_profile_field, $code_profile_field);
-				if($result){
-					$char_info = db_fetch_object($result);
-					if($char_info){
-						if ($char_info->name == $name_profile_field){
-							$char_name = $char_info->value;
-							$char_info = db_fetch_object($result);
-							$char_code = $char_info->value;
-						} else if ($char_info->name == $code_profile_field) {
-							$char_code = $char_info->value;
-							$char_info = db_fetch_object($result);
-							$char_name = $char_info->value;
-						} else {
-							drupal_set_message("db_fetch_object returned unknown character information object format.", "error");
-							return null;
-						}
-					} else {
-						// Error fetching db object
-						drupal_set_message("could not fetch object from result set.", "error");
-						return null;
-					}
-				} else {
-					// Error we couldn't find user info the database anymore
-					// but we have some expired cache data for him
-					drupal_set_message("could not find user battle.net info in database.", "warning");
+			'SELECT {profile_fields}.name, {profile_values}.value
+			FROM {profile_values}
+			LEFT JOIN {profile_fields} ON {profile_values}.fid = {profile_fields}.fid
+			WHERE {profile_values}.uid = %d
+			AND {profile_fields}.name IN (\'%s\', \'%s\', \'%s\', \'%s\')',
+			$uid, $name_profile_field, $code_profile_field, $region_profile_field, $bnet_profile_field);
+		while ($char_info = db_fetch_object($result)){
+			switch ($char_info->name){
+				case $name_profile_field:
+					$char_name = $char_info->value;
+					break;
+				case $code_profile_field:
+					$char_code = $char_info->value;
+					break;
+				case $region_profile_field:
+					$char_region = $char_info->value;
+					break;
+				case $bnet_profile_field:
+					$char_url = $char_info->value;
+					break;
+				default:
+					drupal_set_message("db_fetch_object returned unknown character information object format.", "error");
 					return null;
-				}
-				
-		if ($char_name == "" || $char_name == null || $char_code == null || $char_code == 0){
+			}
+		}
+
+	
+		if (strlen($char_region) == 0 || strlen($char_name) == 0 || $char_code == 0){
+			drupal_set_message(t("There is information missing from the profile."), "error");
 			return null;
 		}
 		
 		// Update the data from the sc2ranks site
 		$request = new sc2ranks_request($app_key);
-		$new_char_data = $request->get_character_data($char_name, $char_code);
+		$new_char_data = $request->get_character_data($char_name, $char_code, $char_region);
+		if($new_char_data->error){
+			$bnet_id = helper_parse_bnetid($char_url);
+			$new_char_data = $request->get_character_data($char_name, $bnet_id, $char_region);	
+		}
 		$new_team_data = $request->get_bracket_data();
-		
+		$league = helper_league_to_int($new_team_data[0]->league);	
 		// pack the info
 		$to_save = array(
 			'uid' => $uid,
+			'region' => $char_region,
 			'character_name' => $char_name,
 			'character_code' => $char_code,
-			'league' => $new_team_data[0]->league,
+			'league' => $league,
 			'points' => $new_team_data[0]->points,
 			'division' => $new_team_data[0]->division,
 			'wins' => $new_team_data[0]->wins,
-			'loses' => $new_team_data[0]->losses,
+			'losses' => $new_team_data[0]->losses,
 			'fav_race' => $new_team_data[0]->fav_race,
 			'bnet_id'	=> $new_char_data->bnet_id,
 			'modified' => $current_time);
@@ -92,7 +135,7 @@
 			drupal_write_record("cache_sc2ranks", $to_save);
 		} else {
 			if($debug) drupal_set_message("Writing data to table as update.");
-			drupal_write_record("cache_sc2ranks", $to_save, $uid);
+			drupal_write_record("cache_sc2ranks", $to_save, 'uid');
 		}
 		// Select what we just inserted
 		$result = db_query('SELECT * FROM {cache_sc2ranks} WHERE uid = %d', $uid);
@@ -124,7 +167,7 @@
 		$result = db_query('SELECT * FROM {cache_sc2ranks} WHERE uid = %d', $uid);
 		// Refer to sc2ranks.install for database schema
 		if($user = db_fetch_object($result)){
-			if (($user->modified - $current_time) >= $cache_expiration){
+			if (($user->modified + $cache_expiration) <= $current_time){
 				if($debug) drupal_set_message("Updating cached data.");
 				return helper_update_sc2ranks($user->uid, FALSE);
 			} else {
@@ -137,6 +180,16 @@
 			// Create new cache entry if user has bnet info
 			if($debug) drupal_set_message("Creating new object.");
 			return helper_update_sc2ranks($uid);
+		}
+	}
+
+	/**
+	 * Implementation of hook_cron
+	 */
+	function sc2ranks_cron() {
+		$result = db_query('select uid from {cache_sc2ranks} where modified + %d <= %d', array(60*variable_get("sc2ranks_cache_expiration", 60*24*7), time()));
+		while ($obj = db_fetch_object($result)){
+			helper_update_sc2ranks($obj->uid, FALSE);
 		}
 	}
 	
@@ -154,7 +207,7 @@
 	 * Implementation of hook_perm()
 	 */
 	function sc2ranks_perm(){
-		return array('view sc2ranks records', 'administer sc2ranks module');
+		return array('view sc2ranks records', 'administer sc2ranks module', 'access character code');
 	}
 
 	/**
@@ -174,17 +227,21 @@
 	 */
 	function template_preprocess_profile_sc2ranks(&$variables){
 		if($variables['record_data']){
-			$variables['sc2ranks_profile_url'] = 'http://www.sc2ranks.com/us/' .
+			$variables['show_code'] = (bool) db_result(db_query('SELECT fid FROM {profile_fields} WHERE name = \'%s\' AND visibility NOT IN (%d, %d)', array(variable_get("sc2ranks_code_profile_field", "profile_character_code"), PROFILE_PRIVATE, PROFILE_HIDDEN)));
+
+			$variables['sc2ranks_profile_url'] = 'http://www.sc2ranks.com/' .
+			$variables['record_data']->region . '/' .
 			$variables['record_data']->bnet_id . '/' .
 			$variables['record_data']->character_name . '/';
 			
-			$variables['bnet_profile_url'] = "http://us.battle.net/sc2/en/profile/" .
+			$variables['bnet_profile_url'] = 'http://' .
+			$variables['record_data']->region . '.battle.net/sc2/en/profile/' .
 			$variables['record_data']->bnet_id . '/1/' . 
 			$variables['record_data']->character_name . '/';
 			
 			$variables['league_image_url'] = base_path() . 
 			drupal_get_path('module', 'sc2ranks') . "/images/icon-rank-" .
-			$variables['record_data']->league . ".png";
+			helper_int_to_league($variables['record_data']->league) . ".png";
 			
 			$variables['race_image_url'] = base_path() . 
 			drupal_get_path('module', 'sc2ranks') . "/images/icon-race-" .
@@ -194,13 +251,15 @@
 			drupal_get_path('module', 'sc2ranks') . "/images/sc2ranks-icon.png";
 			
 			$variables['bnet_icon_url'] = base_path() . 
-			drupal_get_path('module', 'sc2ranks') . "/images/bnet-icon.png";
+			helper_int_to_league($variables['record_data']->league) . ".png";
 			
-			if($variables['losses'] == 0){
-				$variables['ratio'] = 100;
+			$games = $variables['record_data']->wins + $variables['record_data']->losses;
+			if($games == 0){
+				$variables['ratio'] = 0;
 			} else {
-				$variables['ratio'] = $variables['wins']/$variables['losses'];
+				$variables['ratio'] = ($variables['record_data']->wins / $games) * 100;
 			}
+                        $variables['blue_ribbion_url'] = base_path() . drupal_get_path('module','sc2ranks') . "/images/blue_ribbon.png";
 		}
 	}
 	
@@ -236,6 +295,15 @@
 				'#description' => 'The api key for sc2ranks.com, should just be your site name, any key is valid.',
 				'#required' => FALSE
 			),
+			'sc2ranks_region_profile_field' => array(
+				'#type'	=> 'textfield',
+				'#title' => 'Character region profile field',
+				'#default_value' => variable_get('sc2ranks_region_profile_field', "profile_character_region"),
+				'#size' => 63,
+				'#maxlength' => 255,
+				'#description' => 'The field you created using the profile module to hold a player\'s BNET character region.',
+				'#required' => TRUE
+			),
 			'sc2ranks_name_profile_field' => array(
 				'#type'	=> 'textfield',
 				'#title' => 'Character name profile field',
@@ -253,6 +321,15 @@
 				'#maxlength' => 255,
 				'#description' => 'The field you created using the profile module to hold a player\'s BNET character code.',
 				'#required' => TRUE
+			),
+			'sc2ranks_url_profile_field' => array(
+				'#type'	=> 'textfield',
+				'#title' => 'Battle net profile url.',
+				'#default_value' => variable_get('sc2ranks_url_profile_field', "profile_bnet_url"),
+				'#size' => 63,
+				'#maxlength' => 255,
+				'#description' => 'The field you created using the profile module to hold a player\'s BNET url',
+				'#required' => FALSE 
 			),
 			'sc2ranks_cache_expiration' => array(
 				'#type'	=> 'textfield',
